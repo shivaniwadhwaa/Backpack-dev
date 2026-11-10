@@ -71,6 +71,10 @@ footer { padding: 0.8rem 1rem; display: grid; gap: 0.6rem; }
 .websites button.mini { padding: 0.2rem 0.55rem; font-size: 0.75rem; }
 .websites .actions { display: flex; gap: 0.9rem; }
 .websites .term { font-size: 0.72rem; color: var(--ink2); white-space: nowrap; }
+.no-websites { margin: -0.1rem 0 0.6rem; }
+.no-websites summary { cursor: pointer; font-size: 0.8rem; color: var(--ink2); width: fit-content; }
+.no-websites summary:hover { color: var(--ink); }
+.no-websites[open] summary { margin-bottom: 0.5rem; }
 .earlier-toggle { display: block; margin: -0.2rem 0 0.6rem; }
 .subhead { font-size: 0.72rem; font-weight: 700; color: var(--ink2); margin: 0.2rem 0 0.45rem; }
 button.link { border: none; background: none; padding: 0; color: var(--ink2); text-decoration: underline; font-size: 0.75rem; justify-self: start; }

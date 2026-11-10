@@ -122,6 +122,10 @@ const WEBSITE_ORDER: Record<CourseWebsite["status"], number> = { missing: 0, fou
 /** Earlier semesters' courses stay tucked away unless the student asks for them. */
 let showEarlierWebsites = false;
 
+/** Courses without a website sit in a collapsed list; it stays open across re-renders once opened. */
+let showNoWebsites = false;
+const hasWebsite = (w: CourseWebsite) => w.status === "found" || w.status === "manual";
+
 /** "https://www.cs61a.org/" -> "cs61a.org". */
 const shortUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
@@ -145,9 +149,18 @@ function renderWebsites(state: State) {
     : !entries.length
       ? "No current courses found on bCourses."
       : missing
-        ? `Couldn't find a website for ${missing} course${missing === 1 ? "" : "s"} on bCourses. Add ${missing === 1 ? "it" : "them"} below, or mark a course as having none.`
+        ? `Couldn't find a website for ${missing} course${missing === 1 ? "" : "s"} on bCourses. Add ${missing === 1 ? "it" : "them"} under "No website found", or mark a course as having none.`
         : "Found on bCourses.";
-  $("websites").replaceChildren(...entries.map(([id, website]) => websiteRow(id, website)));
+  // Only courses with a site get a row; the rest fold into one dropdown so they don't fill the menu.
+  const withSite = entries.filter(([, w]) => hasWebsite(w));
+  const withoutSite = entries.filter(([, w]) => !hasWebsite(w));
+  $("websites").replaceChildren(...withSite.map(([id, website]) => websiteRow(id, website)));
+  $("websites").hidden = !withSite.length;
+  const noSites = $<HTMLDetailsElement>("no-websites-wrap");
+  noSites.hidden = !withoutSite.length;
+  noSites.open = showNoWebsites;
+  $("no-websites-summary").textContent = `No website found (${withoutSite.length})`;
+  $("no-websites").replaceChildren(...withoutSite.map(([id, website]) => websiteRow(id, website)));
 
   const toggle = $<HTMLButtonElement>("toggle-earlier-websites");
   toggle.hidden = !earlier.length;
@@ -319,6 +332,10 @@ $("connect-google").addEventListener("click", async () => {
   const reply = await send({ type: "connectGoogle" });
   say(reply.ok ? "Google Calendar connected." : reply.error, reply.ok ? "ok" : "error");
   await render();
+});
+
+$<HTMLDetailsElement>("no-websites-wrap").addEventListener("toggle", (e) => {
+  showNoWebsites = (e.currentTarget as HTMLDetailsElement).open;
 });
 
 $("save-canvas").addEventListener("click", async () => {
